@@ -1,28 +1,27 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# based on SunBear's code from: https://stackoverflow.com/questions/54081159/how-do-i-link-an-mp3-file-with-a-slider-so-that-the-slider-moves-in-relation-to
+# based on SunBear's code from:
+# https://stackoverflow.com/questions/54081159/how-do-i-link-an-mp3-file-with-a-slider-so-that-the-slider-moves-in-relation-to
 
 from mutagen.mp3 import MP3
 from mutagen import MutagenError
 from pygame import mixer
 import tkinter as tk
-import tkinter.messagebox as tkMessageBox
 
 
 class MusicPlayer(tk.Frame):
 
     def __init__(self, master, filename='sample.mp3', *args, **kwargs):
-
         super().__init__(master)  # initilizes self, which is a tk.Frame
         self.pack()
 
         # MusicPlayer's Atrributes
         self.master = master  # Tk window
         self.track = filename  # Audio file
-        self.trackLength = None  # Audio file length
+        self.track_length = None  # Audio file length
         self.player = None  # Music player
-        self.playBut = None  # Play Button
-        self.stopBut = None  # Stop Button
+        self.btn_play = None  # Play Button
+        self.btn_stop = None  # Stop Button
         self.slider = None  # Progress Bar
         self.slider_value = None  # Progress Bar value
 
@@ -40,9 +39,9 @@ class MusicPlayer(tk.Frame):
         except MutagenError:
             print("Fail to load audio file ({}) metadata".format(self.track))
         else:
-            trackLength = f.info.length
-        self.trackLength = trackLength
-        print('self.trackLength', type(self.trackLength), self.trackLength, ' sec')
+            track_length = f.info.length
+        self.track_length = track_length
+        print('self.trackLength', type(self.track_length), self.track_length, ' sec')
 
     def load_audiofile(self):
         '''Initialise pygame mixer, load audio file and set volume.'''
@@ -58,14 +57,14 @@ class MusicPlayer(tk.Frame):
     def create_widgets(self):
         '''Create Buttons (e.g. Start & Stop ) and Progress Bar.'''
         print('\ndef create_Widgets ( self ):')
-        self.playBut = tk.Button(self, text='Play', command=self.play)
-        self.playBut.pack()
+        self.btn_play = tk.Button(self, text='Play', command=self.play)
+        self.btn_play.pack()
 
-        self.stopBut = tk.Button(self, text='Stop', command=self.stop)
-        self.stopBut.pack()
+        self.btn_stop = tk.Button(self, text='Stop', command=self.stop)
+        self.btn_stop.pack()
 
         self.slider_value = tk.DoubleVar()
-        self.slider = tk.Scale(self, to=self.trackLength, orient=tk.HORIZONTAL, length=700,
+        self.slider = tk.Scale(self, to=self.track_length, orient=tk.HORIZONTAL, length=700,
                                resolution=0.5, showvalue=True, tickinterval=30, digit=4,
                                variable=self.slider_value, command=self.update_slider)
         self.slider.pack()
@@ -85,12 +84,6 @@ class MusicPlayer(tk.Frame):
     def track_play(self, playtime):
         '''Slider to track the playing of the track.'''
         print('\ndef TrackPlay():')
-        # 1.When track is playing
-        #   1. Set slider position to playtime
-        #   2. Increase playtime by interval (1 sec)
-        #   3. start TrackPlay loop
-        # 2.When track is not playing
-        #   1. Print 'Track Ended'
         if self.player.music.get_busy():
             self.slider_value.set(playtime)
             print(type(self.slider_value.get()), 'slider_value = ', self.slider_value.get())
@@ -121,21 +114,7 @@ class MusicPlayer(tk.Frame):
             print('Play Stopped')
 
 
-def ask_quit():
-    '''Confirmation to quit application.'''
-    if tkMessageBox.askokcancel("Quit", "Exit MusicPlayer"):
-        app.stop()  # Stop playing track
-        app.player.quit()  # Quit pygame.mixer
-        root.destroy()  # Destroy the Tk Window instance.
-
-        # Note: After initialzing pygame.mixer, it will preoccupy an entire CPU core.
-        #       Before destroying the Tk Window, ensure pygame.mixer is quitted too else
-        #       pygame.mixer will still be running in the background despite destroying the
-        #       Tk Window instance.
-
-
 if __name__ == "__main__":
     root = tk.Tk()  # Initialize an instance of Tk window.
     app = MusicPlayer(root)  # Initialize an instance of MusicPlayer object and passing Tk window instance into it as it's master.
-    root.protocol("WM_DELETE_WINDOW", ask_quit)  # Tell Tk window instance what to do before it is destroyed.
     root.mainloop()

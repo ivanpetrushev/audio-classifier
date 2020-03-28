@@ -61,7 +61,6 @@ class MusicPlayer(tk.Frame):
         else:
             track_length = f.info.length
         self.track_length = track_length
-        print('self.trackLength', type(self.track_length), self.track_length, ' sec')
 
     def load_audiofile(self):
         '''Initialise pygame mixer, load audio file and set volume.'''
@@ -70,7 +69,6 @@ class MusicPlayer(tk.Frame):
         print('Loading audio file:', self.track)
         player.music.load(self.track)
         # player.music.set_volume(.25)
-
         self.player = player
 
     def load_datafile(self):
@@ -105,7 +103,7 @@ class MusicPlayer(tk.Frame):
         self.btn_stop.pack()
 
         self.slider_value = tk.DoubleVar()
-        self.slider = tk.Scale(self, to=self.track_length, orient=tk.HORIZONTAL, length=700,
+        self.slider = tk.Scale(self, to=self.track_length, orient=tk.HORIZONTAL, length=800,
                                resolution=0.1, showvalue=True, tickinterval=30, digit=4,
                                variable=self.slider_value, command=self.update_slider)
         self.slider.pack()

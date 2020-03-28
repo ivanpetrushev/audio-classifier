@@ -15,3 +15,7 @@ It is based on the simple Tk audio player from Sunbear: https://stackoverflow.co
 
 
 JSON data will be saved to external file with the same filename as the source sound.
+
+## Tips
+
+You can combine multiple mp3 files into one with `mp3wrap`

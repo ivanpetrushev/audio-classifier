@@ -86,7 +86,7 @@ class MusicPlayer(tk.Frame):
 
         self.slider_value = tk.DoubleVar()
         self.slider = tk.Scale(self, to=self.track_length, orient=tk.HORIZONTAL, length=700,
-                               resolution=0.5, showvalue=True, tickinterval=30, digit=4,
+                               resolution=0.1, showvalue=True, tickinterval=30, digit=4,
                                variable=self.slider_value, command=self.update_slider)
         self.slider.pack()
 

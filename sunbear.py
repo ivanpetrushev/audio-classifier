@@ -19,6 +19,8 @@ class MusicPlayer(tk.Frame):
         self.track = filename
         self.track_length = None
         self.data = []
+        self.current_tag_start = None
+        self.current_tag_end = None
         self.player = None
         self.btn_play = None
         self.btn_stop = None
@@ -27,6 +29,8 @@ class MusicPlayer(tk.Frame):
         self.listbox = None
         self.btn_add_listbox = None
         self.btn_remove_listbox = None
+        self.btn_tag_start_stop = None
+        self.text_tag_start_stop = None
 
         # Call these methods
         self.get_audiofile_metadata()
@@ -65,6 +69,11 @@ class MusicPlayer(tk.Frame):
 
         self.btn_stop = tk.Button(self, text='Stop', command=self.stop)
         self.btn_stop.pack()
+
+        self.text_tag_start_stop = tk.StringVar()
+        self.text_tag_start_stop.set('Tag Start')
+        self.btn_tag_start_stop = tk.Button(self, textvariable=self.text_tag_start_stop, command=self.tag_start_stop)
+        self.btn_tag_start_stop.pack()
 
         self.slider_value = tk.DoubleVar()
         self.slider = tk.Scale(self, to=self.track_length, orient=tk.HORIZONTAL, length=700,
@@ -155,6 +164,17 @@ class MusicPlayer(tk.Frame):
             self.player.music.stop()
             print('Play Stopped')
 
+    def tag_start_stop(self):
+        if not self.current_tag_start:
+            self.current_tag_start = self.slider_value.get()
+            self.text_tag_start_stop.set('Tag Stop')
+            return
+        self.current_tag_end = self.slider_value.get()
+        self.data.append({'start': self.current_tag_start, 'end': self.current_tag_end, 'tag': 'Bau ' + str(len(self.data))})
+        self.current_tag_start = None
+        self.current_tag_end = None
+        self.text_tag_start_stop.set('Tag Start')
+        self.update_listbox()
 
 if __name__ == "__main__":
     root = tk.Tk()  # Initialize an instance of Tk window.

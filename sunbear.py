@@ -7,6 +7,8 @@ from mutagen.mp3 import MP3
 from mutagen import MutagenError
 from pygame import mixer
 import tkinter as tk
+import json
+import os
 
 
 class MusicPlayer(tk.Frame):
@@ -18,7 +20,6 @@ class MusicPlayer(tk.Frame):
         self.master = master
         self.track = filename
         self.track_length = None
-        self.data = []
         self.current_tag_start = None
         self.current_tag_end = None
         self.player = None
@@ -34,14 +35,18 @@ class MusicPlayer(tk.Frame):
         self.field_tags = None
         self.field_tags_value = None
 
+        self.json_filename = filename.replace('.mp3', '.json')
+        self.data = []
+
         # Call these methods
         self.get_audiofile_metadata()
         self.load_audiofile()
+        self.load_datafile()
         self.create_widgets()
+        self.update_listbox()
 
     def get_audiofile_metadata(self):
         '''Get audio file and it's meta data (e.g. tracklength).'''
-
         try:
             f = MP3(self.track)
         except MutagenError:
@@ -59,6 +64,17 @@ class MusicPlayer(tk.Frame):
         player.music.set_volume(.25)
 
         self.player = player
+
+    def load_datafile(self):
+        '''Loads JSON data for this audio file'''
+        if os.path.exists(self.json_filename):
+            with open(self.json_filename, encoding='utf-8') as file:
+                self.data = json.load(file)
+
+    def write_datafile(self):
+        '''Saves JSON data for this audio file'''
+        with open(self.json_filename, 'w', encoding='utf-8') as file:
+            json.dump(self.data, file, ensure_ascii=False, indent=2)
 
     def create_widgets(self):
         '''Create Buttons (e.g. Start & Stop ) and Progress Bar.'''
@@ -104,6 +120,7 @@ class MusicPlayer(tk.Frame):
             return
         idx = sel[0]
         self.data.pop(idx)
+        self.write_datafile()
         self.update_listbox()
 
     def update_listbox(self):
@@ -172,6 +189,7 @@ class MusicPlayer(tk.Frame):
         self.current_tag_end = None
         self.field_tags_value.set('Tags (comma separated)')
         self.btn_tag_start_stop_text.set('Tag Start')
+        self.write_datafile()
         self.update_listbox()
 
 

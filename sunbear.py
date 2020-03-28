@@ -42,7 +42,6 @@ class MusicPlayer(tk.Frame):
 
     def get_audiofile_metadata(self):
         '''Get audio file and it's meta data (e.g. tracklength).'''
-        print('\ndef get_AudioFileMetaData( self, audiofile ):')
 
         try:
             f = MP3(self.track)
@@ -55,18 +54,15 @@ class MusicPlayer(tk.Frame):
 
     def load_audiofile(self):
         '''Initialise pygame mixer, load audio file and set volume.'''
-        print('\ndef load_AudioFile( self, audiofile ):')
         player = mixer
         player.init(frequency=48000) # probably we need metadata.info.sample_rate here
         player.music.load(self.track)
         player.music.set_volume(.25)
 
         self.player = player
-        print('self.player ', self.player)
 
     def create_widgets(self):
         '''Create Buttons (e.g. Start & Stop ) and Progress Bar.'''
-        print('\ndef create_Widgets ( self ):')
         self.btn_play = tk.Button(self, text='Play', command=self.play)
         self.btn_play.pack()
 
@@ -122,32 +118,22 @@ class MusicPlayer(tk.Frame):
         self.update_listbox()
 
     def update_listbox(self):
-        print('\ndef update_listbox():')
         self.listbox.delete(0, tk.END)
         for item in self.data:
             self.listbox.insert(tk.END, '{i[start]}:{i[end]} - {i[tag]}'.format(i=item))
 
     def play(self):
         '''Play track from slider location.'''
-        print('\ndef Play():')
-        # 1. Get slider location.
-        # 2. Play music from slider location.
-        # 3. Update slider location (use tk's .after loop)
         playtime = self.slider_value.get()
-        print(type(playtime), 'playtime = ', playtime, 'sec')
         self.player.music.play(start=playtime)
-        print('Play Started')
         self.track_play(playtime)
 
     def track_play(self, playtime):
         '''Slider to track the playing of the track.'''
-        print('\ndef TrackPlay():')
         if self.player.music.get_busy():
             self.slider_value.set(playtime)
-            print(type(self.slider_value.get()), 'slider_value = ', self.slider_value.get())
             playtime += 1.0
             self.loopID = self.after(1000, lambda: self.track_play(playtime))
-            print('self.loopID = ', self.loopID)
         else:
             print('Track Ended')
 
@@ -167,23 +153,17 @@ class MusicPlayer(tk.Frame):
 
     def update_slider(self, value):
         '''Move slider position when tk.Scale's trough is clicked or when slider is clicked.'''
-        print('\ndef UpdateSlider():')
-        print(type(value), 'value = ', value, ' sec')
         if self.player.music.get_busy():
-            print("Track Playing")
             self.after_cancel(self.loopID)  # Cancel PlayTrack loop
             self.slider_value.set(value)  # Move slider to new position
             self.play()  # Play track from new postion
         else:
-            print("Track Not Playing")
             self.slider_value.set(value)  # Move slider to new position
 
     def stop(self):
         '''Stop the playing of the track.'''
-        print('\ndef Stop():')
         if self.player.music.get_busy():
             self.player.music.stop()
-            print('Play Stopped')
 
     def tag_start_stop(self):
         if not self.current_tag_start:

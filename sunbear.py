@@ -27,7 +27,6 @@ class MusicPlayer(tk.Frame):
         self.slider = None
         self.slider_value = None
         self.listbox = None
-        self.btn_add_listbox = None
         self.btn_remove_listbox = None
         self.btn_tag_start_stop = None
         self.btn_tag_start_stop_text = None
@@ -89,8 +88,6 @@ class MusicPlayer(tk.Frame):
         self.btn_save_tag = tk.Button(self, text='Save', command=self.save_tag)
         self.btn_save_tag.pack()
 
-        self.btn_add_listbox = tk.Button(self, text='Add', command=self.add_data)
-        self.btn_add_listbox.pack()
         self.btn_remove_listbox = tk.Button(self, text='Remove', command=self.remove_data)
         self.btn_remove_listbox.pack()
 
@@ -100,14 +97,6 @@ class MusicPlayer(tk.Frame):
         list_scrollbar.config(command=self.listbox.yview)
         list_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
-
-    def add_data(self):
-        self.data.append({
-            'start': 12,
-            'end': 15,
-            'tag': 'Bau ' + str(len(self.data))
-        })
-        self.update_listbox()
 
     def remove_data(self):
         sel = self.listbox.curselection()

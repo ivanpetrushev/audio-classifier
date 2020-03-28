@@ -31,6 +31,8 @@ class MusicPlayer(tk.Frame):
         self.btn_remove_listbox = None
         self.btn_tag_start_stop = None
         self.btn_tag_start_stop_text = None
+        self.btn_tag_start_stop_icon_play = None
+        self.btn_tag_start_stop_icon_rec = None
         self.btn_save_tag = None
         self.field_tags = None
         self.field_tags_value = None
@@ -78,6 +80,9 @@ class MusicPlayer(tk.Frame):
 
     def create_widgets(self):
         '''Create Buttons (e.g. Start & Stop ) and Progress Bar.'''
+        self.btn_tag_start_stop_icon_play = tk.PhotoImage(file='img/play.png')
+        self.btn_tag_start_stop_icon_rec = tk.PhotoImage(file='img/rec.png')
+
         self.btn_play = tk.Button(self, text='Play', command=self.play)
         self.btn_play.pack()
 
@@ -93,7 +98,8 @@ class MusicPlayer(tk.Frame):
         self.btn_tag_start_stop_text = tk.StringVar()
         self.btn_tag_start_stop_text.set('Tag Start')
         self.btn_tag_start_stop = tk.Button(self, textvariable=self.btn_tag_start_stop_text,
-                                            command=self.tag_start_stop)
+                                            command=self.tag_start_stop, image=self.btn_tag_start_stop_icon_play,
+                                            compound=tk.LEFT)
         self.btn_tag_start_stop.pack()
 
         self.field_tags_value = tk.StringVar()
@@ -148,14 +154,16 @@ class MusicPlayer(tk.Frame):
         if len(sel) == 0:
             return
         idx = sel[0]
-        start = self.data[idx]['start']
-        end = self.data[idx]['end']
-        tag = self.data[idx]['tag']
+        item = self.data[idx]
+        start = item['start']
+        end = item['end']
+        tag = item['tag']
         self.current_tag_start = start
         self.current_tag_end = end
         self.slider_value.set(start)
         self.field_tags_value.set(tag)
         self.btn_tag_start_stop_text.set('Tag Stop')
+        self.btn_tag_start_stop.configure(image=self.btn_tag_start_stop_icon_rec)
 
     def update_slider(self, value):
         '''Move slider position when tk.Scale's trough is clicked or when slider is clicked.'''
@@ -175,6 +183,7 @@ class MusicPlayer(tk.Frame):
         if not self.current_tag_start:
             self.current_tag_start = self.slider_value.get()
             self.btn_tag_start_stop_text.set('Tag Stop')
+            self.btn_tag_start_stop.configure(image=self.btn_tag_start_stop_icon_rec)
             return
         self.current_tag_end = self.slider_value.get()
         self.player.music.stop()
@@ -189,6 +198,7 @@ class MusicPlayer(tk.Frame):
         self.current_tag_end = None
         self.field_tags_value.set('Tags (comma separated)')
         self.btn_tag_start_stop_text.set('Tag Start')
+        self.btn_tag_start_stop.configure(image=self.btn_tag_start_stop_icon_play)
         self.write_datafile()
         self.update_listbox()
 

@@ -50,7 +50,7 @@ class MusicPlayer(tk.Frame):
         '''Initialise pygame mixer, load audio file and set volume.'''
         print('\ndef load_AudioFile( self, audiofile ):')
         player = mixer
-        player.init(frequency=48000)
+        player.init(frequency=48000) # probably we need metadata.info.sample_rate here
         player.music.load(self.track)
         player.music.set_volume(.25)
 
@@ -79,6 +79,7 @@ class MusicPlayer(tk.Frame):
 
         list_scrollbar = tk.Scrollbar(self, orient=tk.VERTICAL)
         self.listbox = tk.Listbox(self, yscrollcommand=list_scrollbar.set)
+        self.listbox.bind('<Double-Button-1>', self.seek_item_start)
         list_scrollbar.config(command=self.listbox.yview)
         list_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
@@ -124,6 +125,15 @@ class MusicPlayer(tk.Frame):
             print('self.loopID = ', self.loopID)
         else:
             print('Track Ended')
+
+    def seek_item_start(self, *event):
+        sel = self.listbox.curselection()
+        if len(sel) == 0:
+            return
+        idx = sel[0]
+        start = self.data[idx]['start']
+        print('start', start)
+        self.slider_value.set(start)
 
     def update_slider(self, value):
         '''Move slider position when tk.Scale's trough is clicked or when slider is clicked.'''

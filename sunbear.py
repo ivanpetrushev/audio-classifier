@@ -9,6 +9,7 @@ from pygame import mixer
 import tkinter as tk
 import json
 import os
+from random import randint
 
 
 class MusicPlayer(tk.Frame):
@@ -36,6 +37,7 @@ class MusicPlayer(tk.Frame):
         self.btn_save_tag = None
         self.field_tags = None
         self.field_tags_value = None
+        self.overview_canvas = None
 
         self.json_filename = filename.replace('.mp3', '.json')
         self.data = []
@@ -46,6 +48,7 @@ class MusicPlayer(tk.Frame):
         self.load_datafile()
         self.create_widgets()
         self.update_listbox()
+        self.update_overview()
 
     def get_audiofile_metadata(self):
         '''Get audio file and it's meta data (e.g. tracklength).'''
@@ -63,7 +66,7 @@ class MusicPlayer(tk.Frame):
         player = mixer
         player.init(frequency=48000) # probably we need metadata.info.sample_rate here
         player.music.load(self.track)
-        player.music.set_volume(.25)
+        # player.music.set_volume(.25)
 
         self.player = player
 
@@ -94,6 +97,9 @@ class MusicPlayer(tk.Frame):
                                resolution=0.1, showvalue=True, tickinterval=30, digit=4,
                                variable=self.slider_value, command=self.update_slider)
         self.slider.pack()
+
+        self.overview_canvas = tk.Canvas(self, height=20)
+        self.overview_canvas.pack(fill=tk.BOTH, expand=1)
 
         self.btn_tag_start_stop_text = tk.StringVar()
         self.btn_tag_start_stop_text.set('Tag Start')
@@ -128,11 +134,22 @@ class MusicPlayer(tk.Frame):
         self.data.pop(idx)
         self.write_datafile()
         self.update_listbox()
+        self.update_overview()
 
     def update_listbox(self):
         self.listbox.delete(0, tk.END)
         for item in self.data:
             self.listbox.insert(tk.END, '{i[start]}:{i[end]} - {i[tag]}'.format(i=item))
+
+    def update_overview(self):
+        self.update()
+        self.overview_canvas.delete(tk.ALL)
+        k = self.overview_canvas.winfo_width() / self.track_length
+        for item in self.data:
+            y = randint(0, 20)
+            x_start = k * item['start']
+            x_end = k * item['end']
+            self.overview_canvas.create_line(x_start, y, x_end, y, width=5)
 
     def play(self):
         '''Play track from slider location.'''
@@ -201,6 +218,7 @@ class MusicPlayer(tk.Frame):
         self.btn_tag_start_stop.configure(image=self.btn_tag_start_stop_icon_play)
         self.write_datafile()
         self.update_listbox()
+        self.update_overview()
 
 
 if __name__ == "__main__":

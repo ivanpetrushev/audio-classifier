@@ -67,6 +67,7 @@ class MusicPlayer(tk.Frame):
         '''Initialise pygame mixer, load audio file and set volume.'''
         player = mixer
         player.init(frequency=48000) # probably we need metadata.info.sample_rate here
+        print('Loading audio file:', self.track)
         player.music.load(self.track)
         # player.music.set_volume(.25)
 
@@ -74,9 +75,12 @@ class MusicPlayer(tk.Frame):
 
     def load_datafile(self):
         '''Loads JSON data for this audio file'''
+        print('Loading data file:', self.json_filename)
         if os.path.exists(self.json_filename):
             with open(self.json_filename, encoding='utf-8') as file:
                 self.data = json.load(file)
+        else:
+            print('Data file not found, will be created on data update')
 
     def write_datafile(self):
         '''Saves JSON data for this audio file'''
@@ -174,8 +178,6 @@ class MusicPlayer(tk.Frame):
             self.slider_value.set(playtime)
             playtime += 1.0
             self.loopID = self.after(1000, lambda: self.track_play(playtime))
-        else:
-            print('Track Ended')
 
     def select_item(self, *event):
         sel = self.listbox.curselection()

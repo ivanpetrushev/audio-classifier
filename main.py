@@ -1,8 +1,11 @@
 from sunbear import MusicPlayer
 import tkinter as tk
+import sys
 
-FILENAME = 'sample.mp3'
+filename = 'sample.mp3'
+if len(sys.argv) > 1:
+    filename = sys.argv[1]
 
 root = tk.Tk()
-app = MusicPlayer(root, filename=FILENAME)
+app = MusicPlayer(root, filename=filename)
 root.mainloop()

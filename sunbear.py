@@ -15,15 +15,18 @@ class MusicPlayer(tk.Frame):
         super().__init__(master)  # initilizes self, which is a tk.Frame
         self.pack()
 
-        # MusicPlayer's Atrributes
-        self.master = master  # Tk window
-        self.track = filename  # Audio file
-        self.track_length = None  # Audio file length
-        self.player = None  # Music player
-        self.btn_play = None  # Play Button
-        self.btn_stop = None  # Stop Button
-        self.slider = None  # Progress Bar
-        self.slider_value = None  # Progress Bar value
+        self.master = master
+        self.track = filename
+        self.track_length = None
+        self.data = []
+        self.player = None
+        self.btn_play = None
+        self.btn_stop = None
+        self.slider = None
+        self.slider_value = None
+        self.listbox = None
+        self.btn_add_listbox = None
+        self.btn_remove_listbox = None
 
         # Call these methods
         self.get_audiofile_metadata()
@@ -68,6 +71,35 @@ class MusicPlayer(tk.Frame):
                                resolution=0.5, showvalue=True, tickinterval=30, digit=4,
                                variable=self.slider_value, command=self.update_slider)
         self.slider.pack()
+
+        self.btn_add_listbox = tk.Button(self, text='Add', command=self.add_data)
+        self.btn_add_listbox.pack()
+        self.btn_remove_listbox = tk.Button(self, text='Remove', command=self.remove_data)
+        self.btn_remove_listbox.pack()
+
+        list_scrollbar = tk.Scrollbar(self, orient=tk.VERTICAL)
+        self.listbox = tk.Listbox(self, yscrollcommand=list_scrollbar.set)
+        list_scrollbar.config(command=self.listbox.yview)
+        list_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
+
+    def add_data(self):
+        self.data.append({'start': 12, 'end': 15, 'tag': 'Bau ' + str(len(self.data))})
+        self.update_listbox()
+
+    def remove_data(self):
+        sel = self.listbox.curselection()
+        if len(sel) == 0:
+            return
+        idx = sel[0]
+        self.data.pop(idx)
+        self.update_listbox()
+
+    def update_listbox(self):
+        print('\ndef update_listbox():')
+        self.listbox.delete(0, tk.END)
+        for item in self.data:
+            self.listbox.insert(tk.END, '{i[start]}:{i[end]} - {i[tag]}'.format(i=item))
 
     def play(self):
         '''Play track from slider location.'''

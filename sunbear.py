@@ -32,8 +32,8 @@ class MusicPlayer(tk.Frame):
         self.slider_update_threshold_ms = 40  # to avoid ALSA underrun errors
         self.listbox = None
         self.btn_remove_listbox = None
-        self.btn_tag_start_stop = None
-        self.btn_tag_start_stop_text = None
+        self.btn_set_tag_start = None
+        self.btn_set_tag_stop = None
         self.btn_save_tag = None
         self.btn_cancel_current = None
         self.field_tags = None
@@ -120,6 +120,9 @@ class MusicPlayer(tk.Frame):
             self.listbox.insert(tk.END,
                                 '{i[start]:>7} {i[end]:>7} {duration:>6}s {i[tag]}'.format(i=item, duration=duration))
 
+    def update_label_current(self):
+        self.label_current_value.set('Current tag: start: ' + str(self.current_tag_start) + ', end: ' + str(self.current_tag_end))
+
     def create_widgets(self):
         '''Create Buttons (e.g. Start & Stop ) and Progress Bar.'''
         self.icon_play = tk.PhotoImage(file='img/play.png')
@@ -144,14 +147,17 @@ class MusicPlayer(tk.Frame):
         self.overview_canvas.pack(fill=tk.BOTH, expand=1)
 
         subframe = tk.Frame(self)
-        self.btn_tag_start_stop_text = tk.StringVar()
-        self.btn_tag_start_stop_text.set('Tag Start')
-        self.btn_tag_start_stop = tk.Button(subframe, textvariable=self.btn_tag_start_stop_text,
-                                            command=self.tag_start_stop, image=self.icon_play,
-                                            compound=tk.LEFT)
-        self.btn_tag_start_stop.pack(side=tk.LEFT)
+        self.btn_set_tag_start = tk.Button(subframe, text="Set Tag Start",
+                                          command=self.set_tag_start, image=self.icon_play,
+                                          compound=tk.LEFT)
+        self.btn_set_tag_start.pack(side=tk.LEFT)
 
-        self.btn_cancel_current = tk.Button(subframe, text='Cancel', command=self.cancel_current,
+        self.btn_set_tag_stop = tk.Button(subframe, text="Set Tag Stop",
+                                            command=self.set_tag_stop, image=self.icon_pause,
+                                            compound=tk.LEFT)
+        self.btn_set_tag_stop.pack(side=tk.LEFT)
+
+        self.btn_cancel_current = tk.Button(subframe, text='Clear Current', command=self.cancel_current,
                                             image=self.icon_cancel,
                                             compound=tk.LEFT)
         self.btn_cancel_current.pack(side=tk.RIGHT)
@@ -216,25 +222,20 @@ class MusicPlayer(tk.Frame):
         else:
             self.slider_value.set(value)  # Move slider to new position
 
-    def tag_start_stop(self):
-        if not self.current_tag_start:
-            self.current_tag_start = self.slider_value.get()
-            self.btn_tag_start_stop_text.set('Tag Stop')
-            self.btn_tag_start_stop.configure(image=self.icon_rec)
-            self.label_current_value.set('Current tag start: ' + str(self.current_tag_start) + 's , end: ')
-            return
+    def set_tag_start(self):
+        self.current_tag_start = self.slider_value.get()
+        self.update_label_current()
+
+    def set_tag_stop(self):
         self.current_tag_end = self.slider_value.get()
+        self.update_label_current()
         self.player.music.stop()
-        self.label_current_value.set(
-            'Current tag start: ' + str(self.current_tag_start) + 's , end: ' + str(self.current_tag_end))
 
     def cancel_current(self):
         self.current_tag_start = None
         self.current_tag_end = None
-        self.btn_tag_start_stop_text.set('Tag Start')
-        self.btn_tag_start_stop.configure(image=self.icon_play)
         self.field_tags_value.set(self.field_tags_default_value)
-        self.label_current_value.set('Current tag start: ')
+        self.update_label_current()
 
     def save_tag(self):
         self.data.append({
@@ -246,8 +247,7 @@ class MusicPlayer(tk.Frame):
         self.current_tag_start = None
         self.current_tag_end = None
         self.field_tags_value.set(self.field_tags_default_value)
-        self.btn_tag_start_stop_text.set('Tag Start')
-        self.btn_tag_start_stop.configure(image=self.icon_play)
+        self.update_label_current()
 
     def remove_data(self):
         sel = self.listbox.curselection()
@@ -279,9 +279,9 @@ class MusicPlayer(tk.Frame):
         self.current_tag_end = end
         self.slider_value.set(start)
         self.field_tags_value.set(tag)
-        self.btn_tag_start_stop_text.set('Tag Stop')
-        self.btn_tag_start_stop.configure(image=self.icon_rec)
-        self.label_current_value.set('Current tag start: ' + str(start) + 's , end: ' + str(end))
+        self.update_label_current()
+        self.is_playing = True
+        self.play_pause()  # Play track from new postion
 
 
 if __name__ == "__main__":

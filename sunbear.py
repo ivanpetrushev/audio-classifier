@@ -40,6 +40,9 @@ class MusicPlayer(tk.Frame):
         self.field_tags_value = None
         self.field_tags_default_value = 'Tags (comma separated)'
         self.overview_canvas = None
+        self.label_info = None
+        self.label_current = None
+        self.label_current_value = None
 
         self.icon_play = None
         self.icon_rec = None
@@ -134,6 +137,10 @@ class MusicPlayer(tk.Frame):
         self.btn_cancel_current.pack(side=tk.RIGHT)
         subframe.pack()
 
+        self.label_current_value = tk.StringVar(value='Current tag:')
+        self.label_current = tk.Label(self, textvariable=self.label_current_value, anchor='w')
+        self.label_current.pack(fill=tk.BOTH, expand=1)
+        
         self.field_tags_value = tk.StringVar()
         self.field_tags_value.set(self.field_tags_default_value)
         self.field_tags = tk.Entry(self, textvariable=self.field_tags_value)
@@ -217,6 +224,7 @@ class MusicPlayer(tk.Frame):
         self.field_tags_value.set(tag)
         self.btn_tag_start_stop_text.set('Tag Stop')
         self.btn_tag_start_stop.configure(image=self.icon_rec)
+        self.label_current_value.set('Current tag start: ' + str(start) + 's , end: ' + str(end))
 
     def update_slider(self, value):
         '''Move slider position when tk.Scale's trough is clicked or when slider is clicked.'''
@@ -242,9 +250,11 @@ class MusicPlayer(tk.Frame):
             self.current_tag_start = self.slider_value.get()
             self.btn_tag_start_stop_text.set('Tag Stop')
             self.btn_tag_start_stop.configure(image=self.icon_rec)
+            self.label_current_value.set('Current tag start: ' + str(self.current_tag_start) + 's , end: ' )
             return
         self.current_tag_end = self.slider_value.get()
         self.player.music.stop()
+        self.label_current_value.set('Current tag start: ' + str(self.current_tag_start) + 's , end: ' + str(self.current_tag_end))
 
     def cancel_current(self):
         self.current_tag_start = None
@@ -252,6 +262,7 @@ class MusicPlayer(tk.Frame):
         self.btn_tag_start_stop_text.set('Tag Start')
         self.btn_tag_start_stop.configure(image=self.icon_play)
         self.field_tags_value.set(self.field_tags_default_value)
+        self.label_current_value.set('Current tag start: ' )
 
     def save_tag(self):
         self.data.append({

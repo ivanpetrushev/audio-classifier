@@ -35,12 +35,16 @@ class MusicPlayer(tk.Frame):
         self.btn_remove_listbox = None
         self.btn_tag_start_stop = None
         self.btn_tag_start_stop_text = None
-        self.btn_tag_start_stop_icon_play = None
-        self.btn_tag_start_stop_icon_rec = None
         self.btn_save_tag = None
+        self.btn_cancel_current = None
         self.field_tags = None
         self.field_tags_value = None
+        self.field_tags_default_value = 'Tags (comma separated)'
         self.overview_canvas = None
+
+        self.icon_play = None
+        self.icon_rec = None
+        self.icon_cancel = None
 
         self.json_filename = filename.replace('.mp3', '.json')
         self.data = []
@@ -96,8 +100,9 @@ class MusicPlayer(tk.Frame):
 
     def create_widgets(self):
         '''Create Buttons (e.g. Start & Stop ) and Progress Bar.'''
-        self.btn_tag_start_stop_icon_play = tk.PhotoImage(file='img/play.png')
-        self.btn_tag_start_stop_icon_rec = tk.PhotoImage(file='img/rec.png')
+        self.icon_play = tk.PhotoImage(file='img/play.png')
+        self.icon_rec = tk.PhotoImage(file='img/rec.png')
+        self.icon_cancel = tk.PhotoImage(file='img/cancel.png')
 
         self.btn_play = tk.Button(self, text='Play', command=self.play)
         self.btn_play.pack()
@@ -114,15 +119,21 @@ class MusicPlayer(tk.Frame):
         self.overview_canvas = tk.Canvas(self, height=20)
         self.overview_canvas.pack(fill=tk.BOTH, expand=1)
 
+        subframe = tk.Frame(self)
         self.btn_tag_start_stop_text = tk.StringVar()
         self.btn_tag_start_stop_text.set('Tag Start')
-        self.btn_tag_start_stop = tk.Button(self, textvariable=self.btn_tag_start_stop_text,
-                                            command=self.tag_start_stop, image=self.btn_tag_start_stop_icon_play,
+        self.btn_tag_start_stop = tk.Button(subframe, textvariable=self.btn_tag_start_stop_text,
+                                            command=self.tag_start_stop, image=self.icon_play,
                                             compound=tk.LEFT)
-        self.btn_tag_start_stop.pack()
+        self.btn_tag_start_stop.pack(side=tk.LEFT)
+
+        self.btn_cancel_current = tk.Button(subframe, text='Cancel', command=self.cancel_current, image=self.icon_cancel,
+                                            compound=tk.LEFT)
+        self.btn_cancel_current.pack(side=tk.RIGHT)
+        subframe.pack()
 
         self.field_tags_value = tk.StringVar()
-        self.field_tags_value.set('Tags (comma separated)')
+        self.field_tags_value.set(self.field_tags_default_value)
         self.field_tags = tk.Entry(self, textvariable=self.field_tags_value)
         self.field_tags.pack(fill=tk.BOTH, expand=1)
 
@@ -194,7 +205,7 @@ class MusicPlayer(tk.Frame):
         self.slider_value.set(start)
         self.field_tags_value.set(tag)
         self.btn_tag_start_stop_text.set('Tag Stop')
-        self.btn_tag_start_stop.configure(image=self.btn_tag_start_stop_icon_rec)
+        self.btn_tag_start_stop.configure(image=self.icon_rec)
 
     def update_slider(self, value):
         '''Move slider position when tk.Scale's trough is clicked or when slider is clicked.'''
@@ -223,10 +234,17 @@ class MusicPlayer(tk.Frame):
         if not self.current_tag_start:
             self.current_tag_start = self.slider_value.get()
             self.btn_tag_start_stop_text.set('Tag Stop')
-            self.btn_tag_start_stop.configure(image=self.btn_tag_start_stop_icon_rec)
+            self.btn_tag_start_stop.configure(image=self.icon_rec)
             return
         self.current_tag_end = self.slider_value.get()
         self.player.music.stop()
+
+    def cancel_current(self):
+        self.current_tag_start = None
+        self.current_tag_end = None
+        self.btn_tag_start_stop_text.set('Tag Start')
+        self.btn_tag_start_stop.configure(image=self.icon_play)
+        self.field_tags_value.set(self.field_tags_default_value)
 
     def save_tag(self):
         self.data.append({
@@ -237,9 +255,9 @@ class MusicPlayer(tk.Frame):
         self.data_updated()
         self.current_tag_start = None
         self.current_tag_end = None
-        self.field_tags_value.set('Tags (comma separated)')
+        self.field_tags_value.set(self.field_tags_default_value)
         self.btn_tag_start_stop_text.set('Tag Start')
-        self.btn_tag_start_stop.configure(image=self.btn_tag_start_stop_icon_play)
+        self.btn_tag_start_stop.configure(image=self.icon_play)
 
 
 if __name__ == "__main__":

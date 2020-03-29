@@ -41,3 +41,7 @@ Increase `self.slider_update_threshold_ms`. 40ms is enough for me. If you still 
 ### Slider not responding correctly
 
 Decrease `self.slider_update_threshold_ms` to get better response. Be careful, if you lower it too much, you might hit the problem above.
+
+## Icons
+
+https://www.iconfinder.com/iconsets/flat-circle-content

@@ -29,7 +29,7 @@ class MusicPlayer(tk.Frame):
         self.slider = None
         self.slider_value = None
         self.slider_last_updated_ts = 0
-        self.slider_update_threshold_ms = 40 # to avoid ALSA underrun errors
+        self.slider_update_threshold_ms = 40  # to avoid ALSA underrun errors
         self.listbox = None
         self.btn_remove_listbox = None
         self.btn_tag_start_stop = None
@@ -75,7 +75,7 @@ class MusicPlayer(tk.Frame):
     def load_audiofile(self):
         '''Initialise pygame mixer, load audio file and set volume.'''
         player = mixer
-        player.init(frequency=48000) # probably we need metadata.info.sample_rate here
+        player.init(frequency=48000)  # probably we need metadata.info.sample_rate here
         print('Loading audio file:', self.track)
         player.music.load(self.track)
         # player.music.set_volume(.25)
@@ -117,7 +117,8 @@ class MusicPlayer(tk.Frame):
             duration = item['end'] - item['start']
             duration = round(duration * 10) / 10
             # formatting spaces can be ugly in non-monospaced font
-            self.listbox.insert(tk.END, '{i[start]:>7} {i[end]:>7} {duration:>6}s {i[tag]}'.format(i=item, duration=duration))
+            self.listbox.insert(tk.END,
+                                '{i[start]:>7} {i[end]:>7} {duration:>6}s {i[tag]}'.format(i=item, duration=duration))
 
     def create_widgets(self):
         '''Create Buttons (e.g. Start & Stop ) and Progress Bar.'''
@@ -130,12 +131,12 @@ class MusicPlayer(tk.Frame):
         self.label_info.pack()
 
         self.btn_play = tk.Button(self, text='Play/Pause', command=self.play_pause, image=self.icon_pause,
-                                            compound=tk.LEFT)
+                                  compound=tk.LEFT)
         self.btn_play.pack()
 
         self.slider_value = tk.DoubleVar()
         self.slider = tk.Scale(self, to=self.track_length, orient=tk.HORIZONTAL, length=1200,
-                               resolution=0.5, showvalue=True, #tickinterval=30, digit=4,
+                               resolution=0.5, showvalue=True,  # tickinterval=30, digit=4,
                                variable=self.slider_value, command=self.update_slider)
         self.slider.pack()
 
@@ -150,7 +151,8 @@ class MusicPlayer(tk.Frame):
                                             compound=tk.LEFT)
         self.btn_tag_start_stop.pack(side=tk.LEFT)
 
-        self.btn_cancel_current = tk.Button(subframe, text='Cancel', command=self.cancel_current, image=self.icon_cancel,
+        self.btn_cancel_current = tk.Button(subframe, text='Cancel', command=self.cancel_current,
+                                            image=self.icon_cancel,
                                             compound=tk.LEFT)
         self.btn_cancel_current.pack(side=tk.RIGHT)
         subframe.pack()
@@ -219,11 +221,12 @@ class MusicPlayer(tk.Frame):
             self.current_tag_start = self.slider_value.get()
             self.btn_tag_start_stop_text.set('Tag Stop')
             self.btn_tag_start_stop.configure(image=self.icon_rec)
-            self.label_current_value.set('Current tag start: ' + str(self.current_tag_start) + 's , end: ' )
+            self.label_current_value.set('Current tag start: ' + str(self.current_tag_start) + 's , end: ')
             return
         self.current_tag_end = self.slider_value.get()
         self.player.music.stop()
-        self.label_current_value.set('Current tag start: ' + str(self.current_tag_start) + 's , end: ' + str(self.current_tag_end))
+        self.label_current_value.set(
+            'Current tag start: ' + str(self.current_tag_start) + 's , end: ' + str(self.current_tag_end))
 
     def cancel_current(self):
         self.current_tag_start = None
@@ -231,7 +234,7 @@ class MusicPlayer(tk.Frame):
         self.btn_tag_start_stop_text.set('Tag Start')
         self.btn_tag_start_stop.configure(image=self.icon_play)
         self.field_tags_value.set(self.field_tags_default_value)
-        self.label_current_value.set('Current tag start: ' )
+        self.label_current_value.set('Current tag start: ')
 
     def save_tag(self):
         self.data.append({

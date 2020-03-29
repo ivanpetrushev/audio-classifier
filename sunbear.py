@@ -101,6 +101,24 @@ class MusicPlayer(tk.Frame):
         self.update_listbox()
         self.update_overview()
 
+    def update_overview(self):
+        self.update()
+        self.overview_canvas.delete(tk.ALL)
+        k = self.overview_canvas.winfo_width() / self.track_length
+        for item in self.data:
+            y = randint(0, 20)
+            x_start = k * item['start']
+            x_end = k * item['end']
+            self.overview_canvas.create_line(x_start, y, x_end, y, width=5)
+
+    def update_listbox(self):
+        self.listbox.delete(0, tk.END)
+        for item in self.data:
+            duration = item['end'] - item['start']
+            duration = round(duration * 10) / 10
+            # formatting spaces can be ugly in non-monospaced font
+            self.listbox.insert(tk.END, '{i[start]:>7} {i[end]:>7} {duration:>6}s {i[tag]}'.format(i=item, duration=duration))
+
     def create_widgets(self):
         '''Create Buttons (e.g. Start & Stop ) and Progress Bar.'''
         self.icon_play = tk.PhotoImage(file='img/play.png')
@@ -116,7 +134,7 @@ class MusicPlayer(tk.Frame):
         self.btn_play.pack()
 
         self.slider_value = tk.DoubleVar()
-        self.slider = tk.Scale(self, to=self.track_length, orient=tk.HORIZONTAL, length=800,
+        self.slider = tk.Scale(self, to=self.track_length, orient=tk.HORIZONTAL, length=1200,
                                resolution=0.5, showvalue=True, #tickinterval=30, digit=4,
                                variable=self.slider_value, command=self.update_slider)
         self.slider.pack()
@@ -140,7 +158,7 @@ class MusicPlayer(tk.Frame):
         self.label_current_value = tk.StringVar(value='Current tag:')
         self.label_current = tk.Label(self, textvariable=self.label_current_value, anchor='w')
         self.label_current.pack(fill=tk.BOTH, expand=1)
-        
+
         self.field_tags_value = tk.StringVar()
         self.field_tags_value.set(self.field_tags_default_value)
         self.field_tags = tk.Entry(self, textvariable=self.field_tags_value)
@@ -161,32 +179,7 @@ class MusicPlayer(tk.Frame):
         list_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
 
-    def remove_data(self):
-        sel = self.listbox.curselection()
-        if len(sel) == 0:
-            return
-        idx = sel[0]
-        self.data.pop(idx)
-        self.data_updated()
-
-    def update_listbox(self):
-        self.listbox.delete(0, tk.END)
-        for item in self.data:
-            duration = item['end'] - item['start']
-            duration = round(duration * 10) / 10
-            # formatting spaces can be ugly in non-monospaced font
-            self.listbox.insert(tk.END, '{i[start]:>7} {i[end]:>7} {duration:>6}s {i[tag]}'.format(i=item, duration=duration))
-
-    def update_overview(self):
-        self.update()
-        self.overview_canvas.delete(tk.ALL)
-        k = self.overview_canvas.winfo_width() / self.track_length
-        for item in self.data:
-            y = randint(0, 20)
-            x_start = k * item['start']
-            x_end = k * item['end']
-            self.overview_canvas.create_line(x_start, y, x_end, y, width=5)
-
+    # control change commands (button click, slider move, etc.)
     def play_pause(self):
         '''Play track from slider location.'''
         if self.is_playing:
@@ -201,30 +194,6 @@ class MusicPlayer(tk.Frame):
             self.player.music.play(start=playtime)
             self.track_play(playtime)
         self.is_playing = not self.is_playing
-
-    def track_play(self, playtime):
-        '''Slider to track the playing of the track.'''
-        if self.player.music.get_busy():
-            self.slider_value.set(playtime)
-            playtime += 1.0
-            self.loopID = self.after(1000, lambda: self.track_play(playtime))
-
-    def select_item(self, *event):
-        sel = self.listbox.curselection()
-        if len(sel) == 0:
-            return
-        idx = sel[0]
-        item = self.data[idx]
-        start = item['start']
-        end = item['end']
-        tag = item['tag']
-        self.current_tag_start = start
-        self.current_tag_end = end
-        self.slider_value.set(start)
-        self.field_tags_value.set(tag)
-        self.btn_tag_start_stop_text.set('Tag Stop')
-        self.btn_tag_start_stop.configure(image=self.icon_rec)
-        self.label_current_value.set('Current tag start: ' + str(start) + 's , end: ' + str(end))
 
     def update_slider(self, value):
         '''Move slider position when tk.Scale's trough is clicked or when slider is clicked.'''
@@ -276,6 +245,40 @@ class MusicPlayer(tk.Frame):
         self.field_tags_value.set(self.field_tags_default_value)
         self.btn_tag_start_stop_text.set('Tag Start')
         self.btn_tag_start_stop.configure(image=self.icon_play)
+
+    def remove_data(self):
+        sel = self.listbox.curselection()
+        if len(sel) == 0:
+            return
+        idx = sel[0]
+        self.data.pop(idx)
+        self.data_updated()
+
+    # end of commands
+
+    def track_play(self, playtime):
+        '''Slider to track the playing of the track.'''
+        if self.player.music.get_busy():
+            self.slider_value.set(playtime)
+            playtime += 1.0
+            self.loopID = self.after(1000, lambda: self.track_play(playtime))
+
+    def select_item(self, *event):
+        sel = self.listbox.curselection()
+        if len(sel) == 0:
+            return
+        idx = sel[0]
+        item = self.data[idx]
+        start = item['start']
+        end = item['end']
+        tag = item['tag']
+        self.current_tag_start = start
+        self.current_tag_end = end
+        self.slider_value.set(start)
+        self.field_tags_value.set(tag)
+        self.btn_tag_start_stop_text.set('Tag Stop')
+        self.btn_tag_start_stop.configure(image=self.icon_rec)
+        self.label_current_value.set('Current tag start: ' + str(start) + 's , end: ' + str(end))
 
 
 if __name__ == "__main__":

@@ -25,12 +25,14 @@ class MusicPlayer(tk.Frame):
         self.current_tag_start = None
         self.current_tag_end = None
         self.player = None
-        self.btn_play = None
         self.slider = None
         self.slider_value = None
         self.slider_last_updated_ts = 0
         self.slider_update_threshold_ms = 40  # to avoid ALSA underrun errors
         self.listbox = None
+        self.btn_play = None
+        self.btn_10_left = None
+        self.btn_10_right = None
         self.btn_remove_listbox = None
         self.btn_set_tag_start = None
         self.btn_set_tag_stop = None
@@ -47,6 +49,9 @@ class MusicPlayer(tk.Frame):
         self.icon_play = None
         self.icon_rec = None
         self.icon_cancel = None
+        self.icon_pause = None
+        self.icon_plus = None
+        self.icon_minus = None
 
         self.json_filename = filename.replace('.mp3', '.json')
         self.data = []
@@ -129,6 +134,8 @@ class MusicPlayer(tk.Frame):
         self.icon_rec = tk.PhotoImage(file='img/rec.png')
         self.icon_cancel = tk.PhotoImage(file='img/cancel.png')
         self.icon_pause = tk.PhotoImage(file='img/pause.png')
+        self.icon_plus = tk.PhotoImage(file='img/plus.png')
+        self.icon_minus = tk.PhotoImage(file='img/minus.png')
 
         self.label_info = tk.Label(self, text='Playing: ' + self.track)
         self.label_info.pack()
@@ -136,6 +143,14 @@ class MusicPlayer(tk.Frame):
         self.btn_play = tk.Button(self, text='Play/Pause', command=self.play_pause, image=self.icon_pause,
                                   compound=tk.LEFT)
         self.btn_play.pack()
+
+        subframe_10 = tk.Frame(self)
+        self.btn_10_left = tk.Button(subframe_10, text='-10s', command=self.seek_10_left)
+        self.btn_10_left.pack(side=tk.LEFT)
+
+        self.btn_10_right = tk.Button(subframe_10, text='+10s', command=self.seek_10_right)
+        self.btn_10_right.pack(side=tk.RIGHT)
+        subframe_10.pack()
 
         self.slider_value = tk.DoubleVar()
         self.slider = tk.Scale(self, to=self.track_length, orient=tk.HORIZONTAL, length=1200,
@@ -172,10 +187,10 @@ class MusicPlayer(tk.Frame):
         self.field_tags = tk.Entry(self, textvariable=self.field_tags_value)
         self.field_tags.pack(fill=tk.BOTH, expand=1)
 
-        self.btn_save_tag = tk.Button(self, text='Save', command=self.save_tag)
+        self.btn_save_tag = tk.Button(self, text='Save', command=self.save_tag, image=self.icon_plus, compound=tk.LEFT)
         self.btn_save_tag.pack()
 
-        self.btn_remove_listbox = tk.Button(self, text='Remove', command=self.remove_data)
+        self.btn_remove_listbox = tk.Button(self, text='Remove', command=self.remove_data, image=self.icon_minus, compound=tk.LEFT)
         self.btn_remove_listbox.pack()
 
         list_scrollbar = tk.Scrollbar(self, orient=tk.VERTICAL)
@@ -202,6 +217,14 @@ class MusicPlayer(tk.Frame):
             self.player.music.play(start=playtime)
             self.track_play(playtime)
         self.is_playing = not self.is_playing
+
+    def seek_10_left(self):
+        value = str(int(self.slider_value.get()) - 10)
+        self.update_slider(value)
+
+    def seek_10_right(self):
+        value = str(int(self.slider_value.get()) + 10)
+        self.update_slider(value)
 
     def update_slider(self, value):
         '''Move slider position when tk.Scale's trough is clicked or when slider is clicked.'''

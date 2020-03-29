@@ -26,7 +26,6 @@ class MusicPlayer(tk.Frame):
         self.current_tag_end = None
         self.player = None
         self.btn_play = None
-        self.btn_stop = None
         self.slider = None
         self.slider_value = None
         self.slider_last_updated_ts = 0
@@ -48,6 +47,7 @@ class MusicPlayer(tk.Frame):
 
         self.json_filename = filename.replace('.mp3', '.json')
         self.data = []
+        self.is_playing = False
 
         # Call these methods
         self.get_audiofile_metadata()
@@ -57,7 +57,7 @@ class MusicPlayer(tk.Frame):
         self.update_listbox()
         self.update_overview()
 
-        self.play()
+        self.play_pause()
 
     def get_audiofile_metadata(self):
         '''Get audio file and it's meta data (e.g. tracklength).'''
@@ -103,12 +103,14 @@ class MusicPlayer(tk.Frame):
         self.icon_play = tk.PhotoImage(file='img/play.png')
         self.icon_rec = tk.PhotoImage(file='img/rec.png')
         self.icon_cancel = tk.PhotoImage(file='img/cancel.png')
+        self.icon_pause = tk.PhotoImage(file='img/pause.png')
 
-        self.btn_play = tk.Button(self, text='Play', command=self.play)
+        self.label_info = tk.Label(self, text='Playing: ' + self.track)
+        self.label_info.pack()
+
+        self.btn_play = tk.Button(self, text='Play/Pause', command=self.play_pause, image=self.icon_pause,
+                                            compound=tk.LEFT)
         self.btn_play.pack()
-
-        self.btn_stop = tk.Button(self, text='Stop', command=self.stop)
-        self.btn_stop.pack()
 
         self.slider_value = tk.DoubleVar()
         self.slider = tk.Scale(self, to=self.track_length, orient=tk.HORIZONTAL, length=800,
@@ -178,11 +180,20 @@ class MusicPlayer(tk.Frame):
             x_end = k * item['end']
             self.overview_canvas.create_line(x_start, y, x_end, y, width=5)
 
-    def play(self):
+    def play_pause(self):
         '''Play track from slider location.'''
-        playtime = self.slider_value.get()
-        self.player.music.play(start=playtime)
-        self.track_play(playtime)
+        if self.is_playing:
+            # play -> pause
+            self.btn_play.configure(image=self.icon_play)
+            if self.player.music.get_busy():
+                self.player.music.stop()
+        else:
+            # pause -> play
+            self.btn_play.configure(image=self.icon_pause)
+            playtime = self.slider_value.get()
+            self.player.music.play(start=playtime)
+            self.track_play(playtime)
+        self.is_playing = not self.is_playing
 
     def track_play(self, playtime):
         '''Slider to track the playing of the track.'''
@@ -221,14 +232,10 @@ class MusicPlayer(tk.Frame):
         if self.player.music.get_busy():
             self.after_cancel(self.loopID)  # Cancel PlayTrack loop
             self.slider_value.set(value)  # Move slider to new position
-            self.play()  # Play track from new postion
+            self.is_playing = False
+            self.play_pause()  # Play track from new postion
         else:
             self.slider_value.set(value)  # Move slider to new position
-
-    def stop(self):
-        '''Stop the playing of the track.'''
-        if self.player.music.get_busy():
-            self.player.music.stop()
 
     def tag_start_stop(self):
         if not self.current_tag_start:

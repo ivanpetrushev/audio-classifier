@@ -7,6 +7,7 @@ if len(sys.argv) > 1:
     filename = sys.argv[1]
 
 root = tk.Tk()
+root.title('Audio Classifier')
 root.geometry("800x600")
 app = MusicPlayer(root, filename=filename)
 root.mainloop()

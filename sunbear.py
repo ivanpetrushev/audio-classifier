@@ -9,6 +9,7 @@ from pygame import mixer
 import tkinter as tk
 import json
 import os
+from datetime import datetime
 from random import randint
 
 
@@ -28,6 +29,8 @@ class MusicPlayer(tk.Frame):
         self.btn_stop = None
         self.slider = None
         self.slider_value = None
+        self.slider_last_updated_ts = 0
+        self.slider_update_threshold_ms = 40 # to avoid ALSA underrun errors
         self.listbox = None
         self.btn_remove_listbox = None
         self.btn_tag_start_stop = None
@@ -104,7 +107,7 @@ class MusicPlayer(tk.Frame):
 
         self.slider_value = tk.DoubleVar()
         self.slider = tk.Scale(self, to=self.track_length, orient=tk.HORIZONTAL, length=800,
-                               resolution=0.1, showvalue=True, #tickinterval=30, digit=4,
+                               resolution=0.5, showvalue=True, #tickinterval=30, digit=4,
                                variable=self.slider_value, command=self.update_slider)
         self.slider.pack()
 
@@ -195,6 +198,15 @@ class MusicPlayer(tk.Frame):
 
     def update_slider(self, value):
         '''Move slider position when tk.Scale's trough is clicked or when slider is clicked.'''
+
+        # throttle updating to once in N ms, otherwise we will get ALSA underrun errors
+        dt = datetime.now()
+        now_ts = dt.timestamp()
+        threshold_ts = self.slider_update_threshold_ms / 1000
+        if now_ts - self.slider_last_updated_ts < threshold_ts:
+            return
+        self.slider_last_updated_ts = now_ts
+
         if self.player.music.get_busy():
             self.after_cancel(self.loopID)  # Cancel PlayTrack loop
             self.slider_value.set(value)  # Move slider to new position

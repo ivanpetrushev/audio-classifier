@@ -33,5 +33,11 @@ Combining files with ffmpeg:
 
 ## Troubleshooting
 
-Alsa error on seek in long files: 
+### ALSA error on seek (moving slider quickly) in long files: 
 > ALSA lib pcm.c:8306:(snd_pcm_recover) underrun occurred
+
+Increase `self.slider_update_threshold_ms`. 40ms is enough for me. If you still get this error, increase this value. 
+
+### Slider not responding correctly
+
+Decrease `self.slider_update_threshold_ms` to get better response. Be careful, if you lower it too much, you might hit the problem above.
